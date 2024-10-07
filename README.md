@@ -44,45 +44,48 @@ O projeto consiste no desenvolvimento de uma API backend que oferece as seguinte
 A aplicação foi desenvolvida seguindo os princípios da **Clean Architecture**, visando separar as responsabilidades e manter o código organizado e de fácil manutenção. Isso permite que cada camada da aplicação tenha um papel bem definido e independente das outras, facilitando testes, manutenção e escalabilidade.
 
 #### Camadas da Aplicação
-
+```
 Sorriso_em_Jogo/
-├── Domain/
-│   └── Entities/
-│       ├── Feedback.cs
-│       ├── Habito.cs
-│       ├── Procedimento.cs
-│       ├── ...
 ├── Application/
 │   ├── Services/
 │   │   ├── FeedbackService.cs
 │   │   ├── HabitoService.cs
 │   │   ├── ...
 │   └── DTOs/
-│       ├── FeedbackDTO.cs
-│       ├── HabitoDTO.cs
+│       ├── FeedbackDTOs/
+│       ├── HabitoDTOs/
 │       ├── ...
+├── Domain/
+│   └── Entities/
+│       └── Models/
+│           ├── Feedback.cs
+│           ├── Habito.cs
+│           ├── Procedimento.cs
+│           ├── ...
 ├── Infrastructure/
 │   ├── Data/
 │   │   └── ApplicationDbContext.cs
 │   └── Repositories/
-│       ├── Interfaces/
-│       │   ├── IFeedbackRepository.cs
-│       │   ├── IHabitoRepository.cs
-│       │   ├── ...
-│       └── Implementations/
-│           ├── FeedbackRepository.cs
-│           ├── HabitoRepository.cs
-│           ├── ...
+│       ├── IFeedbackRepository.cs
+│       ├── IHabitoRepository.cs
+│       ├── FeedbackRepository.cs
+│       ├── HabitoRepository.cs
+│       ├── ...
 ├── Presentation/
 │   └── Controllers/
 │       ├── FeedbackController.cs
 │       ├── HabitoController.cs
 │       ├── ...
+│   └── Properties/
 ├── Program.cs
+├── Sorriso_em_Jogo.csproj
+├── Sorriso_em_Jogo.http
+├── WeatherForecast.cs
+├── appsettings.Development.json
 ├── appsettings.json
 ├── README.md
 
-
+```
 1. **Domínio**
    - **Descrição**: Contém os modelos (entidades) e regras de negócio essenciais da aplicação.
    - **Responsabilidades**:
