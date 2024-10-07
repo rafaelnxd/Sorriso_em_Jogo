@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Sorriso_em_Jogo": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:55839;http://localhost:55840"
+    }
+  }
+}
