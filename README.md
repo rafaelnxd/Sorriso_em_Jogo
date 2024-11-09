@@ -184,7 +184,6 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
 1.  **Clonar o Repositório**
 
-    Copiar código
 
     `git clone https://github.com/seu-usuario/Sorriso_em_Jogo.git
     cd Sorriso_em_Jogo`
@@ -199,20 +198,20 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
     Certifique-se de que o banco de dados Oracle está configurado e acessível com as credenciais fornecidas no `appsettings.json`.
 
-    **Adicionar Migrações:**
+4. **Adicionar Migrações:**
 
     `dotnet ef migrations add SegundaEntregaUpdates`
 
-    **Atualizar o Banco de Dados:**
+5. **Atualizar o Banco de Dados:**
 
     `dotnet ef database update`
 
-4.  **Compilar a Aplicação**
+6.  **Compilar a Aplicação**
 
 
     `dotnet build`
 
-5.  **Executar a Aplicação**
+7.  **Executar a Aplicação**
 
 
     `dotnet run`
@@ -221,7 +220,7 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
     -   **HTTPS**: <https://localhost:55839>
     -   **HTTP**: <http://localhost:55840>
-6.  **Acessar a Aplicação**
+8.  **Acessar a Aplicação**
 
     Abra o navegador e acesse um dos URLs acima para interagir com a aplicação.
 
