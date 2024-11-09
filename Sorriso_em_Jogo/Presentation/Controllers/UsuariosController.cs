@@ -1,109 +1,158 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.UsuarioDTOs;
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
-using System.Linq;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
 using System.Threading.Tasks;
+using System.Linq;
+using System;
 
-[Route("api/[controller]")]
-[ApiController]
-public class UsuariosController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly UsuarioService _usuarioService;
-
-    public UsuariosController(UsuarioService usuarioService)
+    [Route("[controller]")]
+    public class UsuariosController : Controller
     {
-        _usuarioService = usuarioService;
-    }
+        private readonly UsuarioService _usuarioService;
 
-    // GET api/usuarios
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<UsuarioDTO>>> Get()
-    {
-        var usuarios = await _usuarioService.GetAllUsuariosAsync();
-
-       
-        var usuarioDtos = usuarios.Select(u => new UsuarioDTO
+        public UsuariosController(UsuarioService usuarioService)
         {
-            Id_usuario = u.Id_usuario,
-            Nome = u.Nome,
-            Email = u.Email,
-            Data_cadastro = u.Data_cadastro,
-            Pontos_recompensa = u.Pontos_recompensa
-        });
+            _usuarioService = usuarioService;
+        }
 
-        return Ok(usuarioDtos);
-    }
-
-    // GET api/usuarios/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UsuarioDTO>> Get(int id)
-    {
-        var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
-        if (usuario == null) return NotFound();
-
-        var usuarioDto = new UsuarioDTO
+        // GET: Usuarios
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            Id_usuario = usuario.Id_usuario,
-            Nome = usuario.Nome,
-            Email = usuario.Email,
-            Data_cadastro = usuario.Data_cadastro,
-            Pontos_recompensa = usuario.Pontos_recompensa
-        };
+            var usuarios = await _usuarioService.GetAllUsuariosAsync();
+            var usuarioViewModels = usuarios.Select(u => new UsuarioViewModel
+            {
+                Id_usuario = u.Id_usuario,
+                Nome = u.Nome,
+                Email = u.Email,
+                Data_cadastro = u.Data_cadastro,
+                Pontos_recompensa = u.Pontos_recompensa
+            });
 
-        return Ok(usuarioDto);
-    }
+            return View(usuarioViewModels);
+        }
 
-    // POST api/usuarios
-    [HttpPost]
-    public async Task<ActionResult<UsuarioDTO>> Post([FromBody] UsuarioCreateDTO usuarioDto)
-    {
-     
-        var usuario = new Usuario
+        // GET: Usuarios/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
-            Nome = usuarioDto.Nome,
-            Email = usuarioDto.Email,
-            Senha = usuarioDto.Senha, 
-            Data_cadastro = DateTime.UtcNow
-        };
+            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+            if (usuario == null) return NotFound();
 
-        await _usuarioService.AddUsuarioAsync(usuario);
+            var usuarioViewModel = new UsuarioViewModel
+            {
+                Id_usuario = usuario.Id_usuario,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Data_cadastro = usuario.Data_cadastro,
+                Pontos_recompensa = usuario.Pontos_recompensa
+            };
 
+            return View(usuarioViewModel);
+        }
 
-        var usuarioCriado = new UsuarioDTO
+        // GET: Usuarios/Create
+        [HttpGet("Create")]
+        public IActionResult Create()
         {
-            Id_usuario = usuario.Id_usuario,
-            Nome = usuario.Nome,
-            Email = usuario.Email,
-            Data_cadastro = usuario.Data_cadastro,
-            Pontos_recompensa = usuario.Pontos_recompensa
-        };
+            return View();
+        }
 
-        return CreatedAtAction(nameof(Get), new { id = usuario.Id_usuario }, usuarioCriado);
-    }
+        // POST: Usuarios/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(UsuarioViewModel usuarioViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var usuario = new Usuario
+                {
+                    Nome = usuarioViewModel.Nome,
+                    Email = usuarioViewModel.Email,
+                    Senha = usuarioViewModel.Senha,
+                    Data_cadastro = DateTime.UtcNow,
+                    Pontos_recompensa = 0
+                };
 
-    // PUT api/usuarios/{id}
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Put(int id, [FromBody] UsuarioUpdateDTO usuarioDto)
-    {
-        var usuarioExistente = await _usuarioService.GetUsuarioByIdAsync(id);
-        if (usuarioExistente == null) return NotFound();
+                await _usuarioService.AddUsuarioAsync(usuario);
+                return RedirectToAction(nameof(Index));
+            }
 
-  
-        usuarioExistente.Nome = usuarioDto.Nome;
-        usuarioExistente.Email = usuarioDto.Email;
-        usuarioExistente.Senha = usuarioDto.Senha; 
+            return View(usuarioViewModel);
+        }
 
-        await _usuarioService.UpdateUsuarioAsync(usuarioExistente);
-        return NoContent();
-    }
+        // GET: Usuarios/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+            if (usuario == null) return NotFound();
 
-    // DELETE api/usuarios/{id}
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        await _usuarioService.DeleteUsuarioAsync(id);
-        return NoContent();
+            var usuarioViewModel = new UsuarioViewModel
+            {
+                Id_usuario = usuario.Id_usuario,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Senha = usuario.Senha,
+                Data_cadastro = usuario.Data_cadastro,
+                Pontos_recompensa = usuario.Pontos_recompensa
+            };
+
+            return View(usuarioViewModel);
+        }
+
+        // POST: Usuarios/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, UsuarioViewModel usuarioViewModel)
+        {
+            if (id != usuarioViewModel.Id_usuario) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+                if (usuario == null) return NotFound();
+
+                usuario.Nome = usuarioViewModel.Nome;
+                usuario.Email = usuarioViewModel.Email;
+                usuario.Senha = usuarioViewModel.Senha;
+
+                await _usuarioService.UpdateUsuarioAsync(usuario);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(usuarioViewModel);
+        }
+
+        // GET: Usuarios/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
+            if (usuario == null) return NotFound();
+
+            var usuarioViewModel = new UsuarioViewModel
+            {
+                Id_usuario = usuario.Id_usuario,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Data_cadastro = usuario.Data_cadastro,
+                Pontos_recompensa = usuario.Pontos_recompensa
+            };
+
+            return View(usuarioViewModel);
+        }
+
+        // POST: Usuarios/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _usuarioService.DeleteUsuarioAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

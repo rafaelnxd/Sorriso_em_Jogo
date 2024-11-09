@@ -1,0 +1,26 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.HabitoViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes do Hábito";
+}
+
+<h2>Detalhes do Hábito</h2>
+
+<div class="form-group">
+    <label>Descrição:</label>
+    <p>@Model.Descricao</p>
+</div>
+<div class="form-group">
+    <label>Tipo:</label>
+    <p>@Model.Tipo</p>
+</div>
+<div class="form-group">
+    <label>Frequência Ideal:</label>
+    <p>@Model.Frequencia_ideal</p>
+</div>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Edit", "Habito", new { id = Model.Id_habito })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Habito")">Voltar para a Lista</a>
+</p>

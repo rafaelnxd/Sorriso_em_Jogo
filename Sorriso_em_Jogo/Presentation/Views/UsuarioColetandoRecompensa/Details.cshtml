@@ -1,0 +1,26 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.UsuarioColetandoRecompensaViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes da Coleta";
+}
+
+<h2>Detalhes da Coleta</h2>
+
+<div class="form-group">
+    <label>Usuário:</label>
+    <p>@Model.UsuarioNome</p>
+</div>
+<div class="form-group">
+    <label>Recompensa:</label>
+    <p>@Model.RecompensaDescricao</p>
+</div>
+<div class="form-group">
+    <label>Data da Coleta:</label>
+    <p>@Model.DataColeta.ToShortDateString()</p>
+</div>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Edit", "UsuarioColetandoRecompensa", new { id = Model.Id })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "UsuarioColetandoRecompensa")">Voltar para a Lista</a>
+</p>

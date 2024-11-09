@@ -8,28 +8,22 @@ namespace Sorriso_em_Jogo.Domain.Entities.Models
     public class UsuarioColetandoRecompensa
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]  
-        public int Id { get; set; }  
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         [Required]
         [ForeignKey("Usuario")]
-        [Column("UsuarioId")]
-        public int UsuarioId { get; set; }  
-
-        [Required]
-        public Usuario Usuario { get; set; } = new Usuario();  
+        public int UsuarioId { get; set; }
+        public Usuario? Usuario { get; set; } // Remova a inicialização
 
         [Required]
         [ForeignKey("Recompensa")]
-        [Column("RecompensaId")]
-        public int RecompensaId { get; set; }  
-
-        [Required]
-        public Recompensa Recompensa { get; set; } = new Recompensa();  
+        public int RecompensaId { get; set; }
+        public Recompensa? Recompensa { get; set; } // Remova a inicialização
 
         [Required]
         [DataType(DataType.Date)]
-        [Column("DataColeta")]
-        public DateTime DataColeta { get; set; }  
+        public DateTime DataColeta { get; set; }
     }
+
 }

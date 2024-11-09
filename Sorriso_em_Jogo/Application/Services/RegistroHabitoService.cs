@@ -69,7 +69,7 @@ namespace Sorriso_em_Jogo.Application.Services
         public async Task UpdateRegistroHabitoAsync(RegistroHabito registroHabito)
         {
             // Verificar se o registro existe
-            var registroExistente = await _registroHabitoRepository.GetByIdAsync(registroHabito.Id_habito);
+            var registroExistente = await _registroHabitoRepository.GetByIdAsync(registroHabito.Id);
             if (registroExistente == null)
             {
                 throw new KeyNotFoundException("Registro de Hábito não encontrado para atualização.");

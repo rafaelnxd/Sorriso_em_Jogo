@@ -1,7 +1,6 @@
 using Sorriso_em_Jogo.Application.Services;
 using Sorriso_em_Jogo.Infrastructure.Repositories;
 
-
 using Microsoft.EntityFrameworkCore;
 using Sorriso_em_Jogo.Infrastructure.Data;
 
@@ -33,8 +32,8 @@ builder.Services.AddScoped<RegistroHabitoService>();
 builder.Services.AddScoped<UnidadeService>();
 builder.Services.AddScoped<UsuarioColetandoRecompensaService>();
 
-// Configurando Swagger e Endpoints
-builder.Services.AddControllers();
+// Configurando serviços MVC com views
+builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -46,9 +45,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+app.UseStaticFiles(); // Permite servir arquivos estáticos (CSS, JS, imagens)
+
+app.UseRouting();
+
 app.UseAuthorization();
-app.MapControllers();
+
+// Configurar rotas padrão para o MVC
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

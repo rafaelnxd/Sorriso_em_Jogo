@@ -1,46 +1,47 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.UnidadeDTOs;
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
+using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class UnidadesController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly UnidadeService _unidadeService;
-
-    public UnidadesController(UnidadeService unidadeService)
+    [Route("[controller]")]
+    public class UnidadesController : Controller
     {
-        _unidadeService = unidadeService;
-    }
+        private readonly UnidadeService _unidadeService;
 
-    // GET api/unidades
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<UnidadeDTO>>> Get()
-    {
-        var unidades = await _unidadeService.GetAllUnidadesAsync();
-        var unidadeDTOs = unidades.Select(u => new UnidadeDTO
+        public UnidadesController(UnidadeService unidadeService)
         {
-            Id_unidade = u.Id_unidade,
-            Nome = u.Nome,
-            Estado = u.Estado,
-            Cidade = u.Cidade,
-            Endereco = u.Endereco
-        });
+            _unidadeService = unidadeService;
+        }
 
-        return Ok(unidadeDTOs);
-    }
+        // GET: Unidades
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var unidades = await _unidadeService.GetAllUnidadesAsync();
+            var unidadeViewModels = unidades.Select(u => new UnidadeViewModel
+            {
+                Id_unidade = u.Id_unidade,
+                Nome = u.Nome,
+                Estado = u.Estado,
+                Cidade = u.Cidade,
+                Endereco = u.Endereco
+            });
 
-    // GET api/unidades/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UnidadeDTO>> Get(int id)
-    {
-        try
+            return View(unidadeViewModels);
+        }
+
+        // GET: Unidades/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
             var unidade = await _unidadeService.GetUnidadeByIdAsync(id);
-            var unidadeDTO = new UnidadeDTO
+            if (unidade == null) return NotFound();
+
+            var unidadeViewModel = new UnidadeViewModel
             {
                 Id_unidade = unidade.Id_unidade,
                 Nome = unidade.Nome,
@@ -49,31 +50,46 @@ public class UnidadesController : ControllerBase
                 Endereco = unidade.Endereco
             };
 
-            return Ok(unidadeDTO);
+            return View(unidadeViewModel);
         }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
 
-    // POST api/unidades
-    [HttpPost]
-    public async Task<ActionResult<UnidadeDTO>> Post([FromBody] UnidadeCreateDTO unidadeCreateDTO)
-    {
-        try
+        // GET: Unidades/Create
+        [HttpGet("Create")]
+        public IActionResult Create()
         {
-            var unidade = new Unidade
+            return View();
+        }
+
+        // POST: Unidades/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(UnidadeViewModel unidadeViewModel)
+        {
+            if (ModelState.IsValid)
             {
-                Nome = unidadeCreateDTO.Nome,
-                Estado = unidadeCreateDTO.Estado,
-                Cidade = unidadeCreateDTO.Cidade,
-                Endereco = unidadeCreateDTO.Endereco
-            };
+                var unidade = new Unidade
+                {
+                    Nome = unidadeViewModel.Nome,
+                    Estado = unidadeViewModel.Estado,
+                    Cidade = unidadeViewModel.Cidade,
+                    Endereco = unidadeViewModel.Endereco
+                };
 
-            await _unidadeService.AddUnidadeAsync(unidade);
+                await _unidadeService.AddUnidadeAsync(unidade);
+                return RedirectToAction(nameof(Index));
+            }
 
-            var unidadeDTO = new UnidadeDTO
+            return View(unidadeViewModel);
+        }
+
+        // GET: Unidades/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var unidade = await _unidadeService.GetUnidadeByIdAsync(id);
+            if (unidade == null) return NotFound();
+
+            var unidadeViewModel = new UnidadeViewModel
             {
                 Id_unidade = unidade.Id_unidade,
                 Nome = unidade.Nome,
@@ -82,56 +98,60 @@ public class UnidadesController : ControllerBase
                 Endereco = unidade.Endereco
             };
 
-            return CreatedAtAction(nameof(Get), new { id = unidadeDTO.Id_unidade }, unidadeDTO);
+            return View(unidadeViewModel);
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
-    // PUT api/unidades/{id}
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Put(int id, [FromBody] UnidadeUpdateDTO unidadeUpdateDTO)
-    {
-        if (id <= 0) return BadRequest("ID inválido.");
-
-        try
+        // POST: Unidades/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, UnidadeViewModel unidadeViewModel)
         {
-            var unidade = new Unidade
+            if (id != unidadeViewModel.Id_unidade) return NotFound();
+
+            if (ModelState.IsValid)
             {
-                Id_unidade = id,
-                Nome = unidadeUpdateDTO.Nome,
-                Estado = unidadeUpdateDTO.Estado,
-                Cidade = unidadeUpdateDTO.Cidade,
-                Endereco = unidadeUpdateDTO.Endereco
+                var unidade = new Unidade
+                {
+                    Id_unidade = unidadeViewModel.Id_unidade,
+                    Nome = unidadeViewModel.Nome,
+                    Estado = unidadeViewModel.Estado,
+                    Cidade = unidadeViewModel.Cidade,
+                    Endereco = unidadeViewModel.Endereco
+                };
+
+                await _unidadeService.UpdateUnidadeAsync(unidade);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(unidadeViewModel);
+        }
+
+        // GET: Unidades/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var unidade = await _unidadeService.GetUnidadeByIdAsync(id);
+            if (unidade == null) return NotFound();
+
+            var unidadeViewModel = new UnidadeViewModel
+            {
+                Id_unidade = unidade.Id_unidade,
+                Nome = unidade.Nome,
+                Estado = unidade.Estado,
+                Cidade = unidade.Cidade,
+                Endereco = unidade.Endereco
             };
 
-            await _unidadeService.UpdateUnidadeAsync(unidade);
-            return NoContent();
+            return View(unidadeViewModel);
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
-    // DELETE api/unidades/{id}
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        try
+        // POST: Unidades/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _unidadeService.DeleteUnidadeAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

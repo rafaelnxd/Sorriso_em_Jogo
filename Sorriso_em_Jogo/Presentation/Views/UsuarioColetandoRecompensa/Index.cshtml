@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Sorriso_em_Jogo.Application.ViewModels.UsuarioColetandoRecompensaViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Coletas de Recompensas";
+}
+
+<h2>Coletas de Recompensas</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "UsuarioColetandoRecompensa")">Adicionar Nova Coleta</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Usuário</th>
+            <th>Recompensa</th>
+            <th>Data da Coleta</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var coleta in Model)
+        {
+            <tr>
+                <td>@coleta.UsuarioNome</td>
+                <td>@coleta.RecompensaDescricao</td>
+                <td>@coleta.DataColeta.ToShortDateString()</td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Details", "UsuarioColetandoRecompensa", new { id = coleta.Id })">Detalhes</a>
+                    <a class="btn btn-warning" href="@Url.Action("Edit", "UsuarioColetandoRecompensa", new { id = coleta.Id })">Editar</a>
+                    <a class="btn btn-danger" href="@Url.Action("Delete", "UsuarioColetandoRecompensa", new { id = coleta.Id })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

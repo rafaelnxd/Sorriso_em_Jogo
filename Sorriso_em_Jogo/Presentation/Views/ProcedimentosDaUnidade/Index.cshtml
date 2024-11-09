@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Sorriso_em_Jogo.Application.ViewModels.ProcedimentosDaUnidadeViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Procedimentos das Unidades";
+}
+
+<h2>Procedimentos das Unidades</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "ProcedimentosDaUnidade")">Adicionar Procedimento à Unidade</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Unidade</th>
+            <th>Procedimento</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UnidadeNome</td>
+                <td>@item.ProcedimentoNome</td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Details", new { unidadeId = item.UnidadeId, procedimentoId = item.ProcedimentoId })">Detalhes</a>
+                    <a class="btn btn-warning" href="@Url.Action("Edit", new { unidadeId = item.UnidadeId, procedimentoId = item.ProcedimentoId })">Editar</a>
+                    <a class="btn btn-danger" href="@Url.Action("Delete", new { unidadeId = item.UnidadeId, procedimentoId = item.ProcedimentoId })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

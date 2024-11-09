@@ -23,7 +23,7 @@ namespace Sorriso_em_Jogo.Domain.Entities.Models
         [ForeignKey("Usuario")]
         public int UsuarioId { get; set; }
 
-        public Usuario Usuario { get; set; } = new Usuario();
+        public Usuario? Usuario { get; set; } // Remova a inicialização com 'new Usuario();'
 
         // Regras de Negócio
 
@@ -44,7 +44,5 @@ namespace Sorriso_em_Jogo.Domain.Entities.Models
                 throw new ArgumentException("O comentário não pode ser vazio ou composto apenas de espaços em branco.");
             }
         }
-
-  
     }
 }

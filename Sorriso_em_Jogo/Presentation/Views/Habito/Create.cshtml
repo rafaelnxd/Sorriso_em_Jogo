@@ -1,0 +1,34 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.HabitoViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Adicionar Novo Hábito";
+}
+
+<h2>Adicionar Novo Hábito</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="Descricao"></label>
+        <input asp-for="Descricao" class="form-control" />
+        <span asp-validation-for="Descricao" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Tipo"></label>
+        <input asp-for="Tipo" class="form-control" />
+        <span asp-validation-for="Tipo" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Frequencia_ideal"></label>
+        <input asp-for="Frequencia_ideal" class="form-control" />
+        <span asp-validation-for="Frequencia_ideal" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Habito")">Cancelar</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

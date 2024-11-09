@@ -1,0 +1,39 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.UsuarioColetandoRecompensaViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Editar Coleta";
+}
+
+<h2>Editar Coleta</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="UsuarioId">Usuário</label>
+        <select asp-for="UsuarioId" class="form-control" asp-items="new SelectList(ViewBag.Usuarios, " Id_usuario", "Nome" , Model.UsuarioId)">
+            <option value="">Selecione um usuário</option>
+        </select>
+        <span asp-validation-for="UsuarioId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="RecompensaId">Recompensa</label>
+        <select asp-for="RecompensaId" class="form-control" asp-items="new SelectList(ViewBag.Recompensas, " Id_recompensa", "Descricao" , Model.RecompensaId)">
+            <option value="">Selecione uma recompensa</option>
+        </select>
+        <span asp-validation-for="RecompensaId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DataColeta"></label>
+        <input asp-for="DataColeta" class="form-control" />
+        <span asp-validation-for="DataColeta" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "UsuarioColetandoRecompensa")">Cancelar</a>
+</form>
+
+        @section Scripts {
+            @{
+                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            }
+        }

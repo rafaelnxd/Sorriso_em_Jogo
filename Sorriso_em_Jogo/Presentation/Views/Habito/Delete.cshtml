@@ -1,0 +1,29 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.HabitoViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Excluir Hábito";
+}
+
+<h2>Excluir Hábito</h2>
+
+<h3>Você tem certeza que deseja excluir este hábito?</h3>
+
+<div class="form-group">
+    <label>Descrição:</label>
+    <p>@Model.Descricao</p>
+</div>
+<div class="form-group">
+    <label>Tipo:</label>
+    <p>@Model.Tipo</p>
+</div>
+<div class="form-group">
+    <label>Frequência Ideal:</label>
+    <p>@Model.Frequencia_ideal</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id_habito" />
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Habito")">Cancelar</a>
+</form>

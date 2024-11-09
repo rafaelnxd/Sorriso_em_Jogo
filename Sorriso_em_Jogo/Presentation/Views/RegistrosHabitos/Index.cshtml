@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Sorriso_em_Jogo.Application.ViewModels.RegistroHabitoViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Registros de Hábitos";
+}
+
+<h2>Registros de Hábitos</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "RegistroHabitos")">Adicionar Novo Registro</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Usuário</th>
+            <th>Hábito</th>
+            <th>Observações</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var registro in Model)
+        {
+            <tr>
+                <td>@registro.Data.ToShortDateString()</td>
+                <td>@registro.UsuarioNome</td>
+                <td>@registro.HabitoDescricao</td>
+                <td>@registro.Observacoes</td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Details", "RegistroHabitos", new { id = registro.Id })">Detalhes</a>
+                    <a class="btn btn-warning" href="@Url.Action("Edit", "RegistroHabitos", new { id = registro.Id })">Editar</a>
+                    <a class="btn btn-danger" href="@Url.Action("Delete", "RegistroHabitos", new { id = registro.Id })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

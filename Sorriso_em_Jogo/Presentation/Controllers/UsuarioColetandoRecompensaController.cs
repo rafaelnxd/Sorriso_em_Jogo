@@ -1,50 +1,55 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.UsuarioColetandoRecompensaDTOs;
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class UsuarioColetandoRecompensaController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly UsuarioColetandoRecompensaService _usuarioColetandoRecompensaService;
-
-    public UsuarioColetandoRecompensaController(UsuarioColetandoRecompensaService usuarioColetandoRecompensaService)
+    [Route("[controller]")]
+    public class UsuarioColetandoRecompensaController : Controller
     {
-        _usuarioColetandoRecompensaService = usuarioColetandoRecompensaService ?? throw new ArgumentNullException(nameof(usuarioColetandoRecompensaService));
-    }
+        private readonly UsuarioColetandoRecompensaService _service;
+        private readonly UsuarioService _usuarioService;
+        private readonly RecompensaService _recompensaService;
 
-    // GET api/usuariocoletandorecompensa
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<UsuarioColetandoRecompensaDTO>>> Get()
-    {
-        var coletas = await _usuarioColetandoRecompensaService.GetAllUsuarioColetandoRecompensasAsync();
-
-        // Convert domain models to DTOs
-        var coletasDTO = coletas.Select(coleta => new UsuarioColetandoRecompensaDTO
+        public UsuarioColetandoRecompensaController(
+            UsuarioColetandoRecompensaService service,
+            UsuarioService usuarioService,
+            RecompensaService recompensaService)
         {
-            Id = coleta.Id,
-            UsuarioId = coleta.UsuarioId,
-            UsuarioNome = coleta.Usuario.Nome,
-            RecompensaId = coleta.RecompensaId,
-            RecompensaDescricao = coleta.Recompensa.Descricao,
-            DataColeta = coleta.DataColeta
-        }).ToList();
+            _service = service;
+            _usuarioService = usuarioService;
+            _recompensaService = recompensaService;
+        }
 
-        return Ok(coletasDTO);
-    }
-
-    // GET api/usuariocoletandorecompensa/{id:int}
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<UsuarioColetandoRecompensaDTO>> Get(int id)
-    {
-        try
+        // GET: UsuarioColetandoRecompensa
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            var coleta = await _usuarioColetandoRecompensaService.GetUsuarioColetandoRecompensaByIdAsync(id);
-            var coletaDTO = new UsuarioColetandoRecompensaDTO
+            var coletas = await _service.GetAllUsuarioColetandoRecompensasAsync();
+            var viewModelList = coletas.Select(coleta => new UsuarioColetandoRecompensaViewModel
+            {
+                Id = coleta.Id,
+                UsuarioId = coleta.UsuarioId,
+                UsuarioNome = coleta.Usuario.Nome,
+                RecompensaId = coleta.RecompensaId,
+                RecompensaDescricao = coleta.Recompensa.Descricao,
+                DataColeta = coleta.DataColeta
+            }).ToList();
+
+            return View(viewModelList);
+        }
+
+        // GET: UsuarioColetandoRecompensa/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var coleta = await _service.GetUsuarioColetandoRecompensaByIdAsync(id);
+            if (coleta == null) return NotFound();
+
+            var viewModel = new UsuarioColetandoRecompensaViewModel
             {
                 Id = coleta.Id,
                 UsuarioId = coleta.UsuarioId,
@@ -54,84 +59,119 @@ public class UsuarioColetandoRecompensaController : ControllerBase
                 DataColeta = coleta.DataColeta
             };
 
-            return Ok(coletaDTO);
+            return View(viewModel);
         }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
 
-    // POST api/usuariocoletandorecompensa
-    [HttpPost]
-    public async Task<ActionResult<UsuarioColetandoRecompensaDTO>> Post([FromBody] CreateUsuarioColetandoRecompensaDTO createDto)
-    {
-        try
+        // GET: UsuarioColetandoRecompensa/Create
+        [HttpGet("Create")]
+        public async Task<IActionResult> Create()
         {
-            var novaColeta = new UsuarioColetandoRecompensa
+            // Carregar lista de usuários e recompensas para popular os dropdowns
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Recompensas = await _recompensaService.GetAllRecompensasAsync();
+
+            return View();
+        }
+
+        // POST: UsuarioColetandoRecompensa/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(UsuarioColetandoRecompensaViewModel viewModel)
+        {
+            if (ModelState.IsValid)
             {
-                UsuarioId = createDto.UsuarioId,
-                RecompensaId = createDto.RecompensaId,
-                DataColeta = createDto.DataColeta
+                var novaColeta = new UsuarioColetandoRecompensa
+                {
+                    UsuarioId = viewModel.UsuarioId,
+                    RecompensaId = viewModel.RecompensaId,
+                    DataColeta = viewModel.DataColeta
+                };
+
+                await _service.AddUsuarioColetandoRecompensaAsync(novaColeta);
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Se o ModelState não for válido, recarregar as listas para os dropdowns
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Recompensas = await _recompensaService.GetAllRecompensasAsync();
+
+            return View(viewModel);
+        }
+
+        // GET: UsuarioColetandoRecompensa/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var coleta = await _service.GetUsuarioColetandoRecompensaByIdAsync(id);
+            if (coleta == null) return NotFound();
+
+            var viewModel = new UsuarioColetandoRecompensaViewModel
+            {
+                Id = coleta.Id,
+                UsuarioId = coleta.UsuarioId,
+                RecompensaId = coleta.RecompensaId,
+                DataColeta = coleta.DataColeta
             };
 
-            await _usuarioColetandoRecompensaService.AddUsuarioColetandoRecompensaAsync(novaColeta);
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Recompensas = await _recompensaService.GetAllRecompensasAsync();
 
-            var coletaDTO = new UsuarioColetandoRecompensaDTO
+            return View(viewModel);
+        }
+
+        // POST: UsuarioColetandoRecompensa/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, UsuarioColetandoRecompensaViewModel viewModel)
+        {
+            if (id != viewModel.Id) return NotFound();
+
+            if (ModelState.IsValid)
             {
-                Id = novaColeta.Id,
-                UsuarioId = novaColeta.UsuarioId,
-                RecompensaId = novaColeta.RecompensaId,
-                DataColeta = novaColeta.DataColeta
+                var coletaExistente = await _service.GetUsuarioColetandoRecompensaByIdAsync(id);
+                if (coletaExistente == null) return NotFound();
+
+                coletaExistente.UsuarioId = viewModel.UsuarioId;
+                coletaExistente.RecompensaId = viewModel.RecompensaId;
+                coletaExistente.DataColeta = viewModel.DataColeta;
+
+                await _service.UpdateUsuarioColetandoRecompensaAsync(coletaExistente);
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Recompensas = await _recompensaService.GetAllRecompensasAsync();
+
+            return View(viewModel);
+        }
+
+        // GET: UsuarioColetandoRecompensa/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var coleta = await _service.GetUsuarioColetandoRecompensaByIdAsync(id);
+            if (coleta == null) return NotFound();
+
+            var viewModel = new UsuarioColetandoRecompensaViewModel
+            {
+                Id = coleta.Id,
+                UsuarioId = coleta.UsuarioId,
+                UsuarioNome = coleta.Usuario.Nome,
+                RecompensaId = coleta.RecompensaId,
+                RecompensaDescricao = coleta.Recompensa.Descricao,
+                DataColeta = coleta.DataColeta
             };
 
-            return CreatedAtAction(nameof(Get), new { id = novaColeta.Id }, coletaDTO);
+            return View(viewModel);
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
-    // PUT api/usuariocoletandorecompensa/{id:int}
-    [HttpPut("{id:int}")]
-    public async Task<ActionResult> Put(int id, [FromBody] UpdateUsuarioColetandoRecompensaDTO updateDto)
-    {
-        if (id != updateDto.Id) return BadRequest();
-
-        try
+        // POST: UsuarioColetandoRecompensa/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var coletaExistente = await _usuarioColetandoRecompensaService.GetUsuarioColetandoRecompensaByIdAsync(id);
-            coletaExistente.UsuarioId = updateDto.UsuarioId;
-            coletaExistente.RecompensaId = updateDto.RecompensaId;
-            coletaExistente.DataColeta = updateDto.DataColeta;
-
-            await _usuarioColetandoRecompensaService.UpdateUsuarioColetandoRecompensaAsync(coletaExistente);
-
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
-
-    // DELETE api/usuariocoletandorecompensa/{id:int}
-    [HttpDelete("{id:int}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        try
-        {
-            await _usuarioColetandoRecompensaService.DeleteUsuarioColetandoRecompensaAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
+            await _service.DeleteUsuarioColetandoRecompensaAsync(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

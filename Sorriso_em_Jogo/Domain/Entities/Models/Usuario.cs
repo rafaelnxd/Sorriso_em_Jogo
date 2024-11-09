@@ -30,7 +30,7 @@ namespace Sorriso_em_Jogo.Domain.Entities.Models
         public DateTime Data_cadastro { get; set; }
 
         [Column("Pontos_recompensa")]
-        public float? Pontos_recompensa { get; private set; } = 0;  
+        public float? Pontos_recompensa { get; set; } = 0;  // Alterado para public set
 
         // Relacionamentos
         public List<Feedback> Feedbacks { get; set; } = new List<Feedback>();

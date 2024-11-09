@@ -1,0 +1,30 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.UnidadeViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes da Unidade";
+}
+
+<h2>Detalhes da Unidade</h2>
+
+<div class="form-group">
+    <label>Nome:</label>
+    <p>@Model.Nome</p>
+</div>
+<div class="form-group">
+    <label>Estado:</label>
+    <p>@Model.Estado</p>
+</div>
+<div class="form-group">
+    <label>Cidade:</label>
+    <p>@Model.Cidade</p>
+</div>
+<div class="form-group">
+    <label>Endereço:</label>
+    <p>@Model.Endereco</p>
+</div>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Edit", "Unidades", new { id = Model.Id_unidade })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Unidades")">Voltar para a Lista</a>
+</p>

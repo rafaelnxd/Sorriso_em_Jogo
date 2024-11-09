@@ -15,59 +15,57 @@ namespace Sorriso_em_Jogo.Application.Services
             _feedbackRepository = feedbackRepository;
         }
 
-        // Obtém um feedback por ID
-        public async Task<Feedback> ObterPorIdAsync(int id)
+        // Obter um feedback por ID
+        public async Task<Feedback> GetFeedbackByIdAsync(int id)
         {
             var feedback = await _feedbackRepository.GetByIdAsync(id);
             if (feedback == null)
             {
                 throw new KeyNotFoundException("Feedback não encontrado.");
             }
-
             return feedback;
         }
 
-        // Obtém todos os feedbacks
-        public async Task<IEnumerable<Feedback>> ObterTodosAsync()
+        // Obter todos os feedbacks
+        public async Task<IEnumerable<Feedback>> GetAllFeedbacksAsync()
         {
             return await _feedbackRepository.GetAllAsync();
         }
 
-        // Adiciona um novo feedback
-        public async Task AdicionarAsync(Feedback feedback)
+        // Adicionar um novo feedback
+        public async Task AddFeedbackAsync(Feedback feedback)
         {
-            if (feedback == null)
-            {
-                throw new ArgumentNullException(nameof(feedback));
-            }
+            // Validações
+            feedback.ValidarDataFeedback();
+            feedback.ValidarComentario();
 
+            // Adicionar o feedback ao banco de dados
             await _feedbackRepository.AddAsync(feedback);
         }
 
-        // Atualiza um feedback existente
-        public async Task AtualizarAsync(Feedback feedback)
+        // Atualizar um feedback existente
+        public async Task UpdateFeedbackAsync(Feedback feedback)
         {
-            if (feedback == null)
+            // Validações
+            if (feedback.Id_feedback <= 0)
             {
-                throw new ArgumentNullException(nameof(feedback));
+                throw new ArgumentException("ID de feedback inválido.");
             }
+            feedback.ValidarDataFeedback();
+            feedback.ValidarComentario();
 
-            var feedbackExistente = await _feedbackRepository.GetByIdAsync(feedback.Id_feedback);
-            if (feedbackExistente == null)
-            {
-                throw new KeyNotFoundException("Feedback não encontrado para atualização.");
-            }
-
+            // Atualizar o feedback no banco de dados
             await _feedbackRepository.UpdateAsync(feedback);
         }
 
-        // Remove um feedback por ID
-        public async Task RemoverAsync(int id)
+        // Deletar um feedback
+        public async Task DeleteFeedbackAsync(int id)
         {
+            // Verificar se o feedback existe antes de deletar
             var feedback = await _feedbackRepository.GetByIdAsync(id);
             if (feedback == null)
             {
-                throw new KeyNotFoundException("Feedback não encontrado para remoção.");
+                throw new KeyNotFoundException("Feedback não encontrado.");
             }
 
             await _feedbackRepository.DeleteAsync(id);

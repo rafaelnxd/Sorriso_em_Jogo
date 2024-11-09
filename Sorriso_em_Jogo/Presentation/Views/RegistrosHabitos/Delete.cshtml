@@ -1,0 +1,40 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.RegistroHabitoViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Excluir Registro de Hábito";
+}
+
+<h2>Excluir Registro de Hábito</h2>
+
+<h3>Você tem certeza que deseja excluir este registro?</h3>
+
+<div class="form-group">
+    <label>Data:</label>
+    <p>@Model.Data.ToShortDateString()</p>
+</div>
+<div class="form-group">
+    <label>Usuário:</label>
+    <p>@Model.UsuarioNome</p>
+</div>
+<div class="form-group">
+    <label>Hábito:</label>
+    <p>@Model.HabitoDescricao</p>
+</div>
+<div class="form-group">
+    <label>Observações:</label>
+    <p>@Model.Observacoes</p>
+</div>
+@if (!string.IsNullOrEmpty(Model.Imagem))
+{
+    <div class="form-group">
+        <label>Imagem:</label>
+        <p><img src="@Model.Imagem" alt="Imagem do Registro" class="img-fluid" /></p>
+    </div>
+}
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "RegistroHabitos")">Cancelar</a>
+</form>

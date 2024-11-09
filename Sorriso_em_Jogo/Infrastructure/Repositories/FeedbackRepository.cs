@@ -19,13 +19,17 @@ namespace Sorriso_em_Jogo.Infrastructure.Repositories
         // Implementação do método para obter feedback pelo ID
         public async Task<Feedback?> GetByIdAsync(int id)
         {
-            return await _context.Feedbacks.FindAsync(id);
+            return await _context.Feedbacks
+                .Include(f => f.Usuario)
+                .FirstOrDefaultAsync(f => f.Id_feedback == id);
         }
 
         // Implementação do método para obter todos os feedbacks
         public async Task<IEnumerable<Feedback>> GetAllAsync()
         {
-            return await _context.Feedbacks.ToListAsync();
+            return await _context.Feedbacks
+                .Include(f => f.Usuario)
+                .ToListAsync();
         }
 
         // Implementação do método para adicionar novo feedback

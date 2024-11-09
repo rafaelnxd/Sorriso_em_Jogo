@@ -1,0 +1,49 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.RegistroHabitoViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Editar Registro de Hábito";
+}
+
+<h2>Editar Registro de Hábito</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Data"></label>
+        <input asp-for="Data" class="form-control" />
+        <span asp-validation-for="Data" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="UsuarioId">Usuário</label>
+        <select asp-for="UsuarioId" class="form-control" asp-items="new SelectList(ViewBag.Usuarios, " Id_usuario", "Nome" , Model.UsuarioId)">
+            <option value="">Selecione um usuário</option>
+        </select>
+        <span asp-validation-for="UsuarioId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="HabitoId">Hábito</label>
+        <select asp-for="HabitoId" class="form-control" asp-items="new SelectList(ViewBag.Habitos, " Id_habito", "Descricao" , Model.HabitoId)">
+            <option value="">Selecione um hábito</option>
+        </select>
+        <span asp-validation-for="HabitoId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Observacoes"></label>
+        <textarea asp-for="Observacoes" class="form-control"></textarea>
+        <span asp-validation-for="Observacoes" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Imagem">Link da Imagem</label>
+        <input asp-for="Imagem" class="form-control" />
+        <span asp-validation-for="Imagem" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "RegistroHabitos")">Cancelar</a>
+</form>
+
+        @section Scripts {
+            @{
+                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            }
+        }

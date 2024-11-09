@@ -1,0 +1,26 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.FeedbackViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes do Feedback";
+}
+
+<h2>Detalhes do Feedback</h2>
+
+<div class="form-group">
+    <label>Data:</label>
+    <p>@Model.Data.ToShortDateString()</p>
+</div>
+<div class="form-group">
+    <label>Comentário:</label>
+    <p>@Model.Comentario</p>
+</div>
+<div class="form-group">
+    <label>Usuário:</label>
+    <p>@Model.UsuarioNome</p>
+</div>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Edit", "Feedbacks", new { id = Model.Id_feedback })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Feedbacks")">Voltar para a Lista</a>
+</p>

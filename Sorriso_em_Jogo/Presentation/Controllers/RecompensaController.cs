@@ -1,155 +1,159 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.RecompensaDTOs;
-using Sorriso_em_Jogo.Application.DTOs.UsuarioColetandoRecompensaDTOs;
-                                                          
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class RecompensaController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly RecompensaService _recompensaService;
-
-    public RecompensaController(RecompensaService recompensaService)
+    [Route("[controller]")]
+    public class RecompensasController : Controller
     {
-        _recompensaService = recompensaService;
-    }
+        private readonly RecompensaService _recompensaService;
 
-    // GET api/recompensa
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<RecompensaDTO>>> Get()
-    {
-        var recompensas = await _recompensaService.GetAllRecompensasAsync();
-
-        // Mapeia as recompensas para DTOs, garantindo que o mapeamento para a lista de UsuarioColetandoRecompensaDTO esteja correto.
-        var recompensaDTOs = recompensas.Select(r => new RecompensaDTO
+        public RecompensasController(RecompensaService recompensaService)
         {
-            Id_recompensa = r.Id_recompensa,
-            Descricao = r.Descricao,
-            Pontos_necessarios = r.Pontos_necessarios,
-            UsuariosColetandoRecompensa = r.UsuariosColetandoRecompensa.Select(u => new UsuarioColetandoRecompensaDTO
+            _recompensaService = recompensaService;
+        }
+
+        // GET: Recompensas
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var recompensas = await _recompensaService.GetAllRecompensasAsync();
+            var recompensaViewModels = recompensas.Select(r => new RecompensaViewModel
             {
-                Id = u.Id,
-                UsuarioId = u.UsuarioId,
-                UsuarioNome = u.Usuario.Nome,
-                RecompensaId = u.RecompensaId,
-                RecompensaDescricao = u.Recompensa.Descricao,
-                DataColeta = u.DataColeta
-            }).ToList() // Garantir que ToList() seja aplicado corretamente para a conversão.
-        }).ToList();
+                Id_recompensa = r.Id_recompensa,
+                Descricao = r.Descricao,
+                Pontos_necessarios = r.Pontos_necessarios
+            }).ToList();
 
-        return Ok(recompensaDTOs);
-    }
+            return View(recompensaViewModels);
+        }
 
-    // GET api/recompensa/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<RecompensaDTO>> Get(int id)
-    {
-        try
+        // GET: Recompensas/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
             var recompensa = await _recompensaService.GetRecompensaByIdAsync(id);
+            if (recompensa == null) return NotFound();
 
-            // Mapeia a recompensa para um DTO
-            var recompensaDTO = new RecompensaDTO
-            {
-                Id_recompensa = recompensa.Id_recompensa,
-                Descricao = recompensa.Descricao,
-                Pontos_necessarios = recompensa.Pontos_necessarios,
-                UsuariosColetandoRecompensa = recompensa.UsuariosColetandoRecompensa.Select(u => new UsuarioColetandoRecompensaDTO
-                {
-                    Id = u.Id,
-                    UsuarioId = u.UsuarioId,
-                    UsuarioNome = u.Usuario.Nome,
-                    RecompensaId = u.RecompensaId,
-                    RecompensaDescricao = u.Recompensa.Descricao,
-                    DataColeta = u.DataColeta
-                }).ToList() // Garantir que ToList() seja aplicado corretamente para a conversão.
-            };
-
-            return Ok(recompensaDTO);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
-
-    // POST api/recompensa
-    [HttpPost]
-    public async Task<ActionResult<RecompensaDTO>> Post([FromBody] RecompensaCreateDTO recompensaCreateDTO)
-    {
-        try
-        {
-            // Mapear DTO para a entidade de domínio Recompensa
-            var recompensa = new Recompensa
-            {
-                Descricao = recompensaCreateDTO.Descricao,
-                Pontos_necessarios = recompensaCreateDTO.Pontos_necessarios
-            };
-
-            await _recompensaService.AddRecompensaAsync(recompensa);
-
-            // Retornar o objeto criado como DTO
-            var recompensaDTO = new RecompensaDTO
+            var recompensaViewModel = new RecompensaViewModel
             {
                 Id_recompensa = recompensa.Id_recompensa,
                 Descricao = recompensa.Descricao,
                 Pontos_necessarios = recompensa.Pontos_necessarios
             };
 
-            return CreatedAtAction(nameof(Get), new { id = recompensaDTO.Id_recompensa }, recompensaDTO);
+            return View(recompensaViewModel);
         }
-        catch (ArgumentException ex)
+
+        // GET: Recompensas/Create
+        [HttpGet("Create")]
+        public IActionResult Create()
         {
-            return BadRequest(ex.Message);
+            return View();
         }
-    }
 
-    // PUT api/recompensa/{id}
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Put(int id, [FromBody] RecompensaUpdateDTO recompensaUpdateDTO)
-    {
-        if (id != recompensaUpdateDTO.Id_recompensa) return BadRequest();
-
-        try
+        // POST: Recompensas/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(RecompensaViewModel recompensaViewModel)
         {
-            // Mapear DTO para a entidade de domínio Recompensa
-            var recompensa = new Recompensa
+            if (ModelState.IsValid)
             {
-                Id_recompensa = recompensaUpdateDTO.Id_recompensa,
-                Descricao = recompensaUpdateDTO.Descricao,
-                Pontos_necessarios = recompensaUpdateDTO.Pontos_necessarios
+                var recompensa = new Recompensa
+                {
+                    Descricao = recompensaViewModel.Descricao,
+                    Pontos_necessarios = recompensaViewModel.Pontos_necessarios
+                };
+
+                await _recompensaService.AddRecompensaAsync(recompensa);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(recompensaViewModel);
+        }
+
+        // GET: Recompensas/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var recompensa = await _recompensaService.GetRecompensaByIdAsync(id);
+            if (recompensa == null) return NotFound();
+
+            var recompensaViewModel = new RecompensaViewModel
+            {
+                Id_recompensa = recompensa.Id_recompensa,
+                Descricao = recompensa.Descricao,
+                Pontos_necessarios = recompensa.Pontos_necessarios
             };
 
-            await _recompensaService.UpdateRecompensaAsync(recompensa);
-            return NoContent();
+            return View(recompensaViewModel);
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
-    // DELETE api/recompensa/{id}
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        try
+        // POST: Recompensas/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, RecompensaViewModel recompensaViewModel)
         {
-            await _recompensaService.DeleteRecompensaAsync(id);
-            return NoContent();
+            if (id != recompensaViewModel.Id_recompensa) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var recompensaExistente = await _recompensaService.GetRecompensaByIdAsync(id);
+                if (recompensaExistente == null) return NotFound();
+
+                recompensaExistente.Descricao = recompensaViewModel.Descricao;
+                recompensaExistente.Pontos_necessarios = recompensaViewModel.Pontos_necessarios;
+
+                await _recompensaService.UpdateRecompensaAsync(recompensaExistente);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(recompensaViewModel);
         }
-        catch (KeyNotFoundException)
+
+        // GET: Recompensas/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return NotFound();
+            var recompensa = await _recompensaService.GetRecompensaByIdAsync(id);
+            if (recompensa == null) return NotFound();
+
+            var recompensaViewModel = new RecompensaViewModel
+            {
+                Id_recompensa = recompensa.Id_recompensa,
+                Descricao = recompensa.Descricao,
+                Pontos_necessarios = recompensa.Pontos_necessarios
+            };
+
+            return View(recompensaViewModel);
         }
-        catch (InvalidOperationException ex)
+
+        // POST: Recompensas/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            return BadRequest(ex.Message);
+            try
+            {
+                await _recompensaService.DeleteRecompensaAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                var recompensa = await _recompensaService.GetRecompensaByIdAsync(id);
+                var recompensaViewModel = new RecompensaViewModel
+                {
+                    Id_recompensa = recompensa.Id_recompensa,
+                    Descricao = recompensa.Descricao,
+                    Pontos_necessarios = recompensa.Pontos_necessarios
+                };
+                return View("Delete", recompensaViewModel);
+            }
         }
     }
 }

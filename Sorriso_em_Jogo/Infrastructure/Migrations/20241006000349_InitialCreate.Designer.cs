@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
-using Sorriso_em_Jogo.Data;
+using Sorriso_em_Jogo.Infrastructure.Data;
 
 #nullable disable
 

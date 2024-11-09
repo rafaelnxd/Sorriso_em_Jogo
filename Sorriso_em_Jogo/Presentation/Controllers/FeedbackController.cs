@@ -1,47 +1,50 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.FeedbackDTOs;
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class FeedbackController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly FeedbackService _feedbackService;
-
-    public FeedbackController(FeedbackService feedbackService)
+    [Route("[controller]")]
+    public class FeedbacksController : Controller
     {
-        _feedbackService = feedbackService;
-    }
+        private readonly FeedbackService _feedbackService;
+        private readonly UsuarioService _usuarioService;
 
-    // GET: api/feedback
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<FeedbackDTO>>> Get()
-    {
-        var feedbacks = await _feedbackService.ObterTodosAsync();
-        var feedbackDtos = feedbacks.Select(f => new FeedbackDTO
+        public FeedbacksController(FeedbackService feedbackService, UsuarioService usuarioService)
         {
-            Id_feedback = f.Id_feedback,
-            Data = f.Data,
-            Comentario = f.Comentario,
-            UsuarioId = f.UsuarioId,
-            UsuarioNome = f.Usuario.Nome 
-        });
+            _feedbackService = feedbackService;
+            _usuarioService = usuarioService;
+        }
 
-        return Ok(feedbackDtos);
-    }
-
-    // GET: api/feedback/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<FeedbackDTO>> Get(int id)
-    {
-        try
+        // GET: Feedbacks
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            var feedback = await _feedbackService.ObterPorIdAsync(id);
+            var feedbacks = await _feedbackService.GetAllFeedbacksAsync();
+            var feedbackViewModels = feedbacks.Select(f => new FeedbackViewModel
+            {
+                Id_feedback = f.Id_feedback,
+                Data = f.Data,
+                Comentario = f.Comentario,
+                UsuarioId = f.UsuarioId,
+                UsuarioNome = f.Usuario.Nome
+            }).ToList();
 
-            var feedbackDto = new FeedbackDTO
+            return View(feedbackViewModels);
+        }
+
+        // GET: Feedbacks/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
+            if (feedback == null) return NotFound();
+
+            var feedbackViewModel = new FeedbackViewModel
             {
                 Id_feedback = feedback.Id_feedback,
                 Data = feedback.Data,
@@ -50,30 +53,104 @@ public class FeedbackController : ControllerBase
                 UsuarioNome = feedback.Usuario.Nome
             };
 
-            return Ok(feedbackDto);
+            return View(feedbackViewModel);
         }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
 
-    // POST: api/feedback
-    [HttpPost]
-    public async Task<ActionResult<FeedbackDTO>> Post([FromBody] FeedbackCreateDTO feedbackCreateDto)
-    {
-        try
+        // GET: Feedbacks/Create
+        [HttpGet("Create")]
+        public async Task<IActionResult> Create()
         {
-            var feedback = new Feedback
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            return View();
+        }
+
+        // POST: Feedbacks/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(FeedbackViewModel feedbackViewModel)
+        {
+            if (ModelState.IsValid)
             {
-                Data = feedbackCreateDto.Data,
-                Comentario = feedbackCreateDto.Comentario,
-                UsuarioId = feedbackCreateDto.UsuarioId
+                var feedback = new Feedback
+                {
+                    Data = feedbackViewModel.Data,
+                    Comentario = feedbackViewModel.Comentario,
+                    UsuarioId = feedbackViewModel.UsuarioId
+                };
+
+                try
+                {
+                    await _feedbackService.AddFeedbackAsync(feedback);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+            }
+
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            return View(feedbackViewModel);
+        }
+
+        // GET: Feedbacks/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
+            if (feedback == null) return NotFound();
+
+            var feedbackViewModel = new FeedbackViewModel
+            {
+                Id_feedback = feedback.Id_feedback,
+                Data = feedback.Data,
+                Comentario = feedback.Comentario,
+                UsuarioId = feedback.UsuarioId
             };
 
-            await _feedbackService.AdicionarAsync(feedback);
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            return View(feedbackViewModel);
+        }
 
-            var feedbackDto = new FeedbackDTO
+        // POST: Feedbacks/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, FeedbackViewModel feedbackViewModel)
+        {
+            if (id != feedbackViewModel.Id_feedback) return BadRequest();
+
+            if (ModelState.IsValid)
+            {
+                var feedbackExistente = await _feedbackService.GetFeedbackByIdAsync(id);
+                if (feedbackExistente == null) return NotFound();
+
+                feedbackExistente.Data = feedbackViewModel.Data;
+                feedbackExistente.Comentario = feedbackViewModel.Comentario;
+                feedbackExistente.UsuarioId = feedbackViewModel.UsuarioId;
+
+                try
+                {
+                    await _feedbackService.UpdateFeedbackAsync(feedbackExistente);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+            }
+
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            return View(feedbackViewModel);
+        }
+
+        // GET: Feedbacks/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
+            if (feedback == null) return NotFound();
+
+            var feedbackViewModel = new FeedbackViewModel
             {
                 Id_feedback = feedback.Id_feedback,
                 Data = feedback.Data,
@@ -82,51 +159,36 @@ public class FeedbackController : ControllerBase
                 UsuarioNome = feedback.Usuario.Nome
             };
 
-            return CreatedAtAction(nameof(Get), new { id = feedback.Id_feedback }, feedbackDto);
+            return View(feedbackViewModel);
         }
-        catch (ArgumentException ex)
+
+        // POST: Feedbacks/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            return BadRequest(ex.Message);
-        }
-    }
+            try
+            {
+                await _feedbackService.DeleteFeedbackAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
+                if (feedback == null) return NotFound();
 
-    // PUT: api/feedback/{id}
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Put(int id, [FromBody] FeedbackUpdateDTO feedbackUpdateDto)
-    {
-        if (id != feedbackUpdateDto.Id_feedback) return BadRequest();
+                var feedbackViewModel = new FeedbackViewModel
+                {
+                    Id_feedback = feedback.Id_feedback,
+                    Data = feedback.Data,
+                    Comentario = feedback.Comentario,
+                    UsuarioId = feedback.UsuarioId,
+                    UsuarioNome = feedback.Usuario.Nome
+                };
 
-        try
-        {
-            var feedbackExistente = await _feedbackService.ObterPorIdAsync(id);
-            if (feedbackExistente == null) return NotFound();
-
-            feedbackExistente.Data = feedbackUpdateDto.Data;
-            feedbackExistente.Comentario = feedbackUpdateDto.Comentario;
-            feedbackExistente.UsuarioId = feedbackUpdateDto.UsuarioId;
-
-            await _feedbackService.AtualizarAsync(feedbackExistente);
-
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    // DELETE: api/feedback/{id}
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        try
-        {
-            await _feedbackService.RemoverAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
+                return View("Delete", feedbackViewModel);
+            }
         }
     }
 }

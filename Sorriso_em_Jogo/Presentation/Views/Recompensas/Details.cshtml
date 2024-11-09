@@ -1,0 +1,22 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.RecompensaViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes da Recompensa";
+}
+
+<h2>Detalhes da Recompensa</h2>
+
+<div class="form-group">
+    <label>Descrição:</label>
+    <p>@Model.Descricao</p>
+</div>
+<div class="form-group">
+    <label>Pontos Necessários:</label>
+    <p>@Model.Pontos_necessarios</p>
+</div>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Edit", "Recompensas", new { id = Model.Id_recompensa })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "Recompensas")">Voltar para a Lista</a>
+</p>

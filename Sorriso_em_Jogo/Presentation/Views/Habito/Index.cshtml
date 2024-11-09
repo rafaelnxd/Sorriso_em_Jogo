@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Sorriso_em_Jogo.Application.ViewModels.HabitoViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lista de Hábitos";
+}
+
+<h2>Lista de Hábitos</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "Habito")">Adicionar Novo Hábito</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th>Frequência Ideal</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var habito in Model)
+        {
+            <tr>
+                <td>@habito.Descricao</td>
+                <td>@habito.Tipo</td>
+                <td>@habito.Frequencia_ideal</td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Details", "Habito", new { id = habito.Id_habito })">Detalhes</a>
+                    <a class="btn btn-warning" href="@Url.Action("Edit", "Habito", new { id = habito.Id_habito })">Editar</a>
+                    <a class="btn btn-danger" href="@Url.Action("Delete", "Habito", new { id = habito.Id_habito })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

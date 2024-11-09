@@ -1,0 +1,37 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.RegistroHabitoViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes do Registro de Hábito";
+}
+
+<h2>Detalhes do Registro de Hábito</h2>
+
+<div class="form-group">
+    <label>Data:</label>
+    <p>@Model.Data.ToShortDateString()</p>
+</div>
+<div class="form-group">
+    <label>Usuário:</label>
+    <p>@Model.UsuarioNome</p>
+</div>
+<div class="form-group">
+    <label>Hábito:</label>
+    <p>@Model.HabitoDescricao</p>
+</div>
+<div class="form-group">
+    <label>Observações:</label>
+    <p>@Model.Observacoes</p>
+</div>
+@if (!string.IsNullOrEmpty(Model.Imagem))
+{
+    <div class="form-group">
+        <label>Imagem:</label>
+        <p><img src="@Model.Imagem" alt="Imagem do Registro" class="img-fluid" /></p>
+    </div>
+}
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Edit", "RegistroHabitos", new { id = Model.Id })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "RegistroHabitos")">Voltar para a Lista</a>
+</p>

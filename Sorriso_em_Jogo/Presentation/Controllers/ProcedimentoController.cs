@@ -1,116 +1,159 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.ProcedimentoDTOs;
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class ProcedimentoController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly ProcedimentoService _procedimentoService;
-
-    public ProcedimentoController(ProcedimentoService procedimentoService)
+    [Route("[controller]")]
+    public class ProcedimentosController : Controller
     {
-        _procedimentoService = procedimentoService;
-    }
+        private readonly ProcedimentoService _procedimentoService;
 
-    // GET: api/procedimento
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProcedimentoDTO>>> Get()
-    {
-        var procedimentos = await _procedimentoService.GetAllProcedimentosAsync();
-        var procedimentoDTOs = procedimentos.Select(p => new ProcedimentoDTO
+        public ProcedimentosController(ProcedimentoService procedimentoService)
         {
-            Id_procedimento = p.Id_procedimento,
-            Nome = p.Nome,
-            Descricao = p.Descricao
-        }).ToList();
-
-        return Ok(procedimentoDTOs);
-    }
-
-    // GET: api/procedimento/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ProcedimentoDTO>> Get(int id)
-    {
-        var procedimento = await _procedimentoService.GetProcedimentoByIdAsync(id);
-
-        if (procedimento == null)
-        {
-            return NotFound();
+            _procedimentoService = procedimentoService;
         }
 
-        var procedimentoDTO = new ProcedimentoDTO
+        // GET: Procedimentos
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            Id_procedimento = procedimento.Id_procedimento,
-            Nome = procedimento.Nome,
-            Descricao = procedimento.Descricao
-        };
+            var procedimentos = await _procedimentoService.GetAllProcedimentosAsync();
+            var procedimentoViewModels = procedimentos.Select(p => new ProcedimentoViewModel
+            {
+                Id_procedimento = p.Id_procedimento,
+                Nome = p.Nome,
+                Descricao = p.Descricao
+            }).ToList();
 
-        return Ok(procedimentoDTO);
-    }
-
-    // POST: api/procedimento
-    [HttpPost]
-    public async Task<ActionResult<ProcedimentoDTO>> Post([FromBody] ProcedimentoCreateDTO createDTO)
-    {
-        var novoProcedimento = new Procedimento
-        {
-            Nome = createDTO.Nome,
-            Descricao = createDTO.Descricao
-        };
-
-        await _procedimentoService.AddProcedimentoAsync(novoProcedimento);
-
-        var procedimentoDTO = new ProcedimentoDTO
-        {
-            Id_procedimento = novoProcedimento.Id_procedimento,
-            Nome = novoProcedimento.Nome,
-            Descricao = novoProcedimento.Descricao
-        };
-
-        return CreatedAtAction(nameof(Get), new { id = procedimentoDTO.Id_procedimento }, procedimentoDTO);
-    }
-
-    // PUT: api/procedimento/{id}
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, [FromBody] ProcedimentoUpdateDTO updateDTO)
-    {
-        if (id != updateDTO.Id_procedimento)
-        {
-            return BadRequest();
+            return View(procedimentoViewModels);
         }
 
-        var procedimentoExistente = await _procedimentoService.GetProcedimentoByIdAsync(id);
-        if (procedimentoExistente == null)
+        // GET: Procedimentos/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
-            return NotFound();
+            var procedimento = await _procedimentoService.GetProcedimentoByIdAsync(id);
+            if (procedimento == null) return NotFound();
+
+            var procedimentoViewModel = new ProcedimentoViewModel
+            {
+                Id_procedimento = procedimento.Id_procedimento,
+                Nome = procedimento.Nome,
+                Descricao = procedimento.Descricao
+            };
+
+            return View(procedimentoViewModel);
         }
 
-        procedimentoExistente.Nome = updateDTO.Nome;
-        procedimentoExistente.Descricao = updateDTO.Descricao;
-
-        await _procedimentoService.UpdateProcedimentoAsync(procedimentoExistente);
-
-        return NoContent();
-    }
-
-    // DELETE: api/procedimento/{id}
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var procedimento = await _procedimentoService.GetProcedimentoByIdAsync(id);
-
-        if (procedimento == null)
+        // GET: Procedimentos/Create
+        [HttpGet("Create")]
+        public IActionResult Create()
         {
-            return NotFound();
+            return View();
         }
 
-        await _procedimentoService.DeleteProcedimentoAsync(id);
+        // POST: Procedimentos/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProcedimentoViewModel procedimentoViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var procedimento = new Procedimento
+                {
+                    Nome = procedimentoViewModel.Nome,
+                    Descricao = procedimentoViewModel.Descricao
+                };
 
-        return NoContent();
+                await _procedimentoService.AddProcedimentoAsync(procedimento);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(procedimentoViewModel);
+        }
+
+        // GET: Procedimentos/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var procedimento = await _procedimentoService.GetProcedimentoByIdAsync(id);
+            if (procedimento == null) return NotFound();
+
+            var procedimentoViewModel = new ProcedimentoViewModel
+            {
+                Id_procedimento = procedimento.Id_procedimento,
+                Nome = procedimento.Nome,
+                Descricao = procedimento.Descricao
+            };
+
+            return View(procedimentoViewModel);
+        }
+
+        // POST: Procedimentos/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ProcedimentoViewModel procedimentoViewModel)
+        {
+            if (id != procedimentoViewModel.Id_procedimento) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var procedimentoExistente = await _procedimentoService.GetProcedimentoByIdAsync(id);
+                if (procedimentoExistente == null) return NotFound();
+
+                procedimentoExistente.Nome = procedimentoViewModel.Nome;
+                procedimentoExistente.Descricao = procedimentoViewModel.Descricao;
+
+                await _procedimentoService.UpdateProcedimentoAsync(procedimentoExistente);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(procedimentoViewModel);
+        }
+
+        // GET: Procedimentos/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var procedimento = await _procedimentoService.GetProcedimentoByIdAsync(id);
+            if (procedimento == null) return NotFound();
+
+            var procedimentoViewModel = new ProcedimentoViewModel
+            {
+                Id_procedimento = procedimento.Id_procedimento,
+                Nome = procedimento.Nome,
+                Descricao = procedimento.Descricao
+            };
+
+            return View(procedimentoViewModel);
+        }
+
+        // POST: Procedimentos/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _procedimentoService.DeleteProcedimentoAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                var procedimento = await _procedimentoService.GetProcedimentoByIdAsync(id);
+                var procedimentoViewModel = new ProcedimentoViewModel
+                {
+                    Id_procedimento = procedimento.Id_procedimento,
+                    Nome = procedimento.Nome,
+                    Descricao = procedimento.Descricao
+                };
+                return View("Delete", procedimentoViewModel);
+            }
+        }
     }
 }

@@ -1,0 +1,33 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.ProcedimentosDaUnidadeViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Editar Procedimento da Unidade";
+}
+
+<h2>Editar Procedimento da Unidade</h2>
+
+<form asp-action="Edit" method="post">
+    <div class="form-group">
+        <label asp-for="UnidadeId">Unidade</label>
+        <select asp-for="UnidadeId" class="form-control" asp-items="new SelectList(ViewBag.Unidades, " Id_unidade", "Nome" )">
+            <option value="">Selecione uma Unidade</option>
+        </select>
+        <span asp-validation-for="UnidadeId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ProcedimentoId">Procedimento</label>
+        <select asp-for="ProcedimentoId" class="form-control" asp-items="new SelectList(ViewBag.Procedimentos, " Id_procedimento", "Nome" )">
+            <option value="">Selecione um Procedimento</option>
+        </select>
+        <span asp-validation-for="ProcedimentoId" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index")">Cancelar</a>
+</form>
+
+        @section Scripts {
+            @{
+                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+            }
+        }

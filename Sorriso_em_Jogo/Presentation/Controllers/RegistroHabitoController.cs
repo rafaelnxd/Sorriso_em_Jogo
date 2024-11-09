@@ -1,140 +1,187 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Sorriso_em_Jogo.Application.DTOs.RegistroHabitoDTOs;
-using Sorriso_em_Jogo.Domain.Entities.Models;
 using Sorriso_em_Jogo.Application.Services;
-using System.Collections.Generic;
+using Sorriso_em_Jogo.Application.ViewModels;
+using Sorriso_em_Jogo.Domain.Entities.Models;
+using System.Linq;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class RegistroHabitoController : ControllerBase
+namespace Sorriso_em_Jogo.Presentation.Controllers
 {
-    private readonly RegistroHabitoService _registroHabitoService;
-
-    public RegistroHabitoController(RegistroHabitoService registroHabitoService)
+    [Route("[controller]")]
+    public class RegistroHabitosController : Controller
     {
-        _registroHabitoService = registroHabitoService;
-    }
+        private readonly RegistroHabitoService _registroHabitoService;
+        private readonly UsuarioService _usuarioService;
+        private readonly HabitoService _habitoService;
 
-    // GET api/registrohabito
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<RegistroHabitoDTO>>> Get()
-    {
-        var registros = await _registroHabitoService.GetAllRegistrosHabitoAsync();
-        var registrosDto = registros.Select(r => new RegistroHabitoDTO
+        public RegistroHabitosController(
+            RegistroHabitoService registroHabitoService,
+            UsuarioService usuarioService,
+            HabitoService habitoService)
         {
-            Id_habito = r.Id_habito,
-            Data = r.Data,
-            Imagem = r.Imagem,
-            Observacoes = r.Observacoes,
-            UsuarioId = r.UsuarioId,
-            UsuarioNome = r.Usuario.Nome, 
-            HabitoId = r.HabitoId,
-            HabitoDescricao = r.Habito.Descricao 
-        }).ToList();
+            _registroHabitoService = registroHabitoService;
+            _usuarioService = usuarioService;
+            _habitoService = habitoService;
+        }
 
-        return Ok(registrosDto);
-    }
+        // GET: RegistroHabitos
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var registros = await _registroHabitoService.GetAllRegistrosHabitoAsync();
+            var viewModelList = registros.Select(r => new RegistroHabitoViewModel
+            {
+                Id = r.Id,
+                Data = r.Data,
+                Imagem = r.Imagem,
+                Observacoes = r.Observacoes,
+                UsuarioId = r.UsuarioId,
+                UsuarioNome = r.Usuario.Nome,
+                HabitoId = r.HabitoId,
+                HabitoDescricao = r.Habito.Descricao
+            }).ToList();
 
-    // GET api/registrohabito/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<RegistroHabitoDTO>> Get(int id)
-    {
-        try
+            return View(viewModelList);
+        }
+
+        // GET: RegistroHabitos/Details/5
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
         {
             var registro = await _registroHabitoService.GetRegistroHabitoByIdAsync(id);
-            var registroDto = new RegistroHabitoDTO
+            if (registro == null) return NotFound();
+
+            var viewModel = new RegistroHabitoViewModel
             {
-                Id_habito = registro.Id_habito,
+                Id = registro.Id,
                 Data = registro.Data,
                 Imagem = registro.Imagem,
                 Observacoes = registro.Observacoes,
                 UsuarioId = registro.UsuarioId,
-                UsuarioNome = registro.Usuario.Nome, 
+                UsuarioNome = registro.Usuario.Nome,
                 HabitoId = registro.HabitoId,
-                HabitoDescricao = registro.Habito.Descricao 
+                HabitoDescricao = registro.Habito.Descricao
             };
-            return Ok(registroDto);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
 
-    // POST api/registrohabito
-    [HttpPost]
-    public async Task<ActionResult<RegistroHabitoDTO>> Post([FromBody] RegistroHabitoCreateDTO registroHabitoDto)
-    {
-        try
+            return View(viewModel);
+        }
+
+        // GET: RegistroHabitos/Create
+        [HttpGet("Create")]
+        public async Task<IActionResult> Create()
         {
-            var registroHabito = new RegistroHabito
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Habitos = await _habitoService.GetAllHabitosAsync();
+
+            return View();
+        }
+
+        // POST: RegistroHabitos/Create
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(RegistroHabitoViewModel viewModel)
+        {
+            if (ModelState.IsValid)
             {
-                Data = registroHabitoDto.Data,
-                Imagem = registroHabitoDto.Imagem,
-                Observacoes = registroHabitoDto.Observacoes,
-                UsuarioId = registroHabitoDto.UsuarioId,
-                HabitoId = registroHabitoDto.HabitoId
-            };
-            await _registroHabitoService.AddRegistroHabitoAsync(registroHabito);
+                var registroHabito = new RegistroHabito
+                {
+                    Data = viewModel.Data,
+                    Imagem = viewModel.Imagem,
+                    Observacoes = viewModel.Observacoes,
+                    UsuarioId = viewModel.UsuarioId,
+                    HabitoId = viewModel.HabitoId
+                };
 
-            var resultDto = new RegistroHabitoDTO
+                await _registroHabitoService.AddRegistroHabitoAsync(registroHabito);
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Habitos = await _habitoService.GetAllHabitosAsync();
+
+            return View(viewModel);
+        }
+
+        // GET: RegistroHabitos/Edit/5
+        [HttpGet("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var registro = await _registroHabitoService.GetRegistroHabitoByIdAsync(id);
+            if (registro == null) return NotFound();
+
+            var viewModel = new RegistroHabitoViewModel
             {
-                Id_habito = registroHabito.Id_habito,
-                Data = registroHabito.Data,
-                Imagem = registroHabito.Imagem,
-                Observacoes = registroHabito.Observacoes,
-                UsuarioId = registroHabito.UsuarioId,
-                UsuarioNome = registroHabito.Usuario.Nome,
-                HabitoId = registroHabito.HabitoId,
-                HabitoDescricao = registroHabito.Habito.Descricao
+                Id = registro.Id,
+                Data = registro.Data,
+                Imagem = registro.Imagem,
+                Observacoes = registro.Observacoes,
+                UsuarioId = registro.UsuarioId,
+                HabitoId = registro.HabitoId
             };
 
-            return CreatedAtAction(nameof(Get), new { id = registroHabito.Id_habito }, resultDto);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Habitos = await _habitoService.GetAllHabitosAsync();
 
-    // PUT api/registrohabito/{id}
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Put(int id, [FromBody] RegistroHabitoUpdateDTO registroHabitoDto)
-    {
-        if (id != registroHabitoDto.Id_habito) return BadRequest();
-        try
+            return View(viewModel);
+        }
+
+        // POST: RegistroHabitos/Edit/5
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, RegistroHabitoViewModel viewModel)
         {
-            var registroHabito = new RegistroHabito
+            if (id != viewModel.Id) return NotFound();
+
+            if (ModelState.IsValid)
             {
-                Id_habito = registroHabitoDto.Id_habito,
-                Data = registroHabitoDto.Data,
-                Imagem = registroHabitoDto.Imagem,
-                Observacoes = registroHabitoDto.Observacoes,
-                UsuarioId = registroHabitoDto.UsuarioId,
-                HabitoId = registroHabitoDto.HabitoId
-            };
-            await _registroHabitoService.UpdateRegistroHabitoAsync(registroHabito);
-            return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+                var registroExistente = await _registroHabitoService.GetRegistroHabitoByIdAsync(id);
+                if (registroExistente == null) return NotFound();
 
-    // DELETE api/registrohabito/{id}
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        try
+                registroExistente.Data = viewModel.Data;
+                registroExistente.Imagem = viewModel.Imagem;
+                registroExistente.Observacoes = viewModel.Observacoes;
+                registroExistente.UsuarioId = viewModel.UsuarioId;
+                registroExistente.HabitoId = viewModel.HabitoId;
+
+                await _registroHabitoService.UpdateRegistroHabitoAsync(registroExistente);
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.Usuarios = await _usuarioService.GetAllUsuariosAsync();
+            ViewBag.Habitos = await _habitoService.GetAllHabitosAsync();
+
+            return View(viewModel);
+        }
+
+        // GET: RegistroHabitos/Delete/5
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var registro = await _registroHabitoService.GetRegistroHabitoByIdAsync(id);
+            if (registro == null) return NotFound();
+
+            var viewModel = new RegistroHabitoViewModel
+            {
+                Id = registro.Id,
+                Data = registro.Data,
+                Imagem = registro.Imagem,
+                Observacoes = registro.Observacoes,
+                UsuarioId = registro.UsuarioId,
+                UsuarioNome = registro.Usuario.Nome,
+                HabitoId = registro.HabitoId,
+                HabitoDescricao = registro.Habito.Descricao
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: RegistroHabitos/Delete/5
+        [HttpPost("Delete/{id}"), ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _registroHabitoService.DeleteRegistroHabitoAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,0 +1,22 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.ProcedimentosDaUnidadeViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalhes do Procedimento da Unidade";
+}
+
+<h2>Detalhes do Procedimento da Unidade</h2>
+
+<div class="form-group">
+    <label>Unidade:</label>
+    <p>@Model.UnidadeNome</p>
+</div>
+<div class="form-group">
+    <label>Procedimento:</label>
+    <p>@Model.ProcedimentoNome</p>
+</div>
+
+<div class="form-group">
+    <a class="btn btn-primary" href="@Url.Action("Edit", new { unidadeId = Model.UnidadeId, procedimentoId = Model.ProcedimentoId })">Editar</a>
+    <a class="btn btn-secondary" href="@Url.Action("Index")">Voltar</a>
+</div>

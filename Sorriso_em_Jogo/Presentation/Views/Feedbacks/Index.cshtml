@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Sorriso_em_Jogo.Application.ViewModels.FeedbackViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lista de Feedbacks";
+}
+
+<h2>Lista de Feedbacks</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "Feedbacks")">Adicionar Novo Feedback</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Comentário</th>
+            <th>Usuário</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var feedback in Model)
+        {
+            <tr>
+                <td>@feedback.Data.ToShortDateString()</td>
+                <td>@feedback.Comentario</td>
+                <td>@feedback.UsuarioNome</td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Details", "Feedbacks", new { id = feedback.Id_feedback })">Detalhes</a>
+                    <a class="btn btn-warning" href="@Url.Action("Edit", "Feedbacks", new { id = feedback.Id_feedback })">Editar</a>
+                    <a class="btn btn-danger" href="@Url.Action("Delete", "Feedbacks", new { id = feedback.Id_feedback })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

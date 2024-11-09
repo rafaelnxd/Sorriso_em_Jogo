@@ -1,0 +1,29 @@
+﻿@model Sorriso_em_Jogo.Application.ViewModels.UsuarioColetandoRecompensaViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Excluir Coleta";
+}
+
+<h2>Excluir Coleta</h2>
+
+<h3>Você tem certeza que deseja excluir esta coleta?</h3>
+
+<div class="form-group">
+    <label>Usuário:</label>
+    <p>@Model.UsuarioNome</p>
+</div>
+<div class="form-group">
+    <label>Recompensa:</label>
+    <p>@Model.RecompensaDescricao</p>
+</div>
+<div class="form-group">
+    <label>Data da Coleta:</label>
+    <p>@Model.DataColeta.ToShortDateString()</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a class="btn btn-secondary" href="@Url.Action("Index", "UsuarioColetandoRecompensa")">Cancelar</a>
+</form>

@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Sorriso_em_Jogo.Application.ViewModels.RecompensaViewModel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lista de Recompensas";
+}
+
+<h2>Lista de Recompensas</h2>
+
+<p>
+    <a class="btn btn-primary" href="@Url.Action("Create", "Recompensas")">Adicionar Nova Recompensa</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th>Pontos Necessários</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var recompensa in Model)
+        {
+            <tr>
+                <td>@recompensa.Descricao</td>
+                <td>@recompensa.Pontos_necessarios</td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Details", "Recompensas", new { id = recompensa.Id_recompensa })">Detalhes</a>
+                    <a class="btn btn-warning" href="@Url.Action("Edit", "Recompensas", new { id = recompensa.Id_recompensa })">Editar</a>
+                    <a class="btn btn-danger" href="@Url.Action("Delete", "Recompensas", new { id = recompensa.Id_recompensa })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
