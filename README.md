@@ -184,8 +184,6 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
 1.  **Clonar o Repositório**
 
-    ``bash
-
     Copiar código
 
     `git clone https://github.com/seu-usuario/Sorriso_em_Jogo.git
