@@ -184,7 +184,7 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
 1.  **Clonar o Repositório**
 
-    bash
+    ``bash
 
     Copiar código
 
