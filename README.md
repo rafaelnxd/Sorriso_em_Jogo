@@ -195,10 +195,6 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
     No terminal, execute:
 
-    bash
-
-    Copiar código
-
     `dotnet restore`
 
 3.  **Aplicar as Migrações do Entity Framework**
@@ -207,33 +203,19 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
     **Adicionar Migrações:**
 
-    bash
-
-    Copiar código
-
     `dotnet ef migrations add SegundaEntregaUpdates`
 
     **Atualizar o Banco de Dados:**
-
-    bash
-
-    Copiar código
 
     `dotnet ef database update`
 
 4.  **Compilar a Aplicação**
 
-    bash
-
-    Copiar código
 
     `dotnet build`
 
 5.  **Executar a Aplicação**
 
-    bash
-
-    Copiar código
 
     `dotnet run`
 
@@ -245,21 +227,6 @@ Certifique-se de que você tem o seguinte instalado em sua máquina:
 
     Abra o navegador e acesse um dos URLs acima para interagir com a aplicação.
 
-### Notas Adicionais
-
--   **Configuração de SSL**: Se encontrar erros relacionados ao SSL (`ERR_SSL_PROTOCOL_ERROR`), você pode temporariamente desabilitar o redirecionamento HTTPS comentando a linha `app.UseHttpsRedirection();` no `Program.cs`. Contudo, para produção, é altamente recomendado manter a segurança com SSL configurado corretamente.
-
--   **Estrutura das Pastas de Views**: As views devem estar organizadas dentro da pasta `Views`, seguindo a nomenclatura dos controllers. Por exemplo, as views do `HomeController` ficam em `Views/Home/`, as do `FeedbacksController` em `Views/Feedbacks/`, e assim por diante.
-
--   **Verificar Rotas**: As rotas estão configuradas no `Program.cs` para apontar para o `HomeController` como padrão. Se desejar alterar o controller inicial, ajuste a configuração de rotas conforme necessário.
-
-    csharp
-
-    Copiar código
-
-    `app.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");`
 
 Tecnologias Utilizadas
 ----------------------
@@ -270,10 +237,4 @@ Tecnologias Utilizadas
 -   **Oracle Database**: Banco de dados relacional utilizado para persistência de dados.
 -   **Clean Architecture**: Princípios arquiteturais para separação de responsabilidades e manutenção do código.
 
-Considerações Finais
---------------------
 
--   **Validações e Segurança**: As entidades possuem validações utilizando data annotations e regras de negócio para garantir a integridade dos dados.
--   **Documentação da API**: Utilização do Swagger para documentação e testes da API.
--   **Estrutura Modular**: Separação clara entre domínio, aplicação, infraestrutura e apresentação, facilitando a manutenção e evolução do sistema.
--   **Futuras Melhorias**: Implementação de autenticação robusta, melhorias na interface do usuário e integração com serviços externos para ampliar as funcionalidades da aplicação.
