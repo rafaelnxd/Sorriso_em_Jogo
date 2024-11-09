@@ -53,10 +53,10 @@ A aplicação foi desenvolvida seguindo os princípios da **Clean Architecture**
 
 #### Camadas da Aplicação
 
-plaintext
+
 
 Copiar código
-
+```
 `Sorriso_em_Jogo/
 ├── Application/
 │   ├── Services/
@@ -118,7 +118,7 @@ Copiar código
 ├── appsettings.Development.json
 ├── appsettings.json
 ├── README.md`
-
+```
 1.  **Domínio**
 
     -   **Descrição**: Contém os modelos (entidades) e regras de negócio essenciais da aplicação.
